@@ -14,7 +14,7 @@
     "start:dev_api": "node scripts/start.js",
     "start:test": "cross-env LOCAL_SERVER=1 SANDBOX_ONLY=true node scripts/start.js",
     "generate": "codesandbox login -s && graphql-codegen --config ./config/codegen.js",
-    "generate:staging": "cross-env CODESANDBOX_NODE_ENV=development yarn generate",
+    "generate:staging": "cross-env CODESANDBOX_NODE_ENV=development yarn generate --staging",
     "build": "cross-env NODE_ENV=production NODE_OPTIONS=\"--max-old-space-size=4096\"   node scripts/build.js",
     "build:embed": "cross-env NODE_ENV=production webpack --config config/webpack.embed.js",
     "build:sandbox": "cross-env NODE_ENV=production SANDBOX_ONLY=true node scripts/build.js",
