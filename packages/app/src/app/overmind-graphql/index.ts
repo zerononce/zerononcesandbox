@@ -1,5 +1,8 @@
-import { request } from 'graphql-request';
-import { Options } from 'graphql-request/dist/src/types';
+import { GraphQLClient } from 'graphql-request';
+import {
+  Headers as HttpHeaders,
+  Options,
+} from 'graphql-request/dist/src/types';
 import { print } from 'graphql/language/printer';
 import { IConfiguration } from 'overmind';
 
@@ -8,6 +11,10 @@ export { default as gql } from 'graphql-tag';
 export interface Query<Result extends any, Payload extends any = void> {
   (payload: Payload): Result;
 }
+
+export type RequestOptions = Omit<Options, 'headers'> & {
+  headers?: HttpHeaders | (() => HttpHeaders);
+};
 
 export function graphql<
   C extends IConfiguration,
@@ -25,8 +32,10 @@ export function graphql<
 ): {
   state: C['state'];
   effects: {
-    connect: (endpoint: string, options?: Options | (() => Options)) => void;
-    disconnect: () => void;
+    initializeGraphQLClient: (
+      endpoint: string,
+      requestOptions?: RequestOptions
+    ) => void;
     queries: {
       [N in keyof G['queries']]: G['queries'][N] extends (
         payload: infer P
@@ -49,23 +58,57 @@ export function graphql<
   actions: C['actions'];
 } {
   const config: any = {};
+  let _client: GraphQLClient;
+  let _requestOptions: RequestOptions;
 
   config.onInitialize = initialConfig.onInitialize;
   config.state = initialConfig.state;
   config.effects = Object.assign(initialConfig.effects || {}, {
+    initializeGraphQLClient: (
+      endpoint: string,
+      requestOptions: RequestOptions = {}
+    ) => {
+      _requestOptions = requestOptions;
+
+      _client = new GraphQLClient(endpoint, {
+        ...requestOptions,
+        headers:
+          typeof requestOptions.headers === 'function'
+            ? requestOptions.headers()
+            : requestOptions.headers,
+      });
+    },
     queries: Object.keys(options.queries || {}).reduce((aggr, key) => {
       aggr[key] = variables => {
+        if (!_client) {
+          throw new Error(
+            `You have not connected to your GraphQL endpoint, please run "connect" first`
+          );
+        }
         const query = options.queries[key] as any;
 
-        return request(options.endpoint, print(query), variables);
+        if (typeof _requestOptions.headers === 'function') {
+          _client.setHeaders(_requestOptions.headers());
+        }
+
+        return _client.request(print(query), variables);
       };
       return aggr;
     }, {}),
     mutations: Object.keys(options.mutations || {}).reduce((aggr, key) => {
       aggr[key] = variables => {
+        if (!_client) {
+          throw new Error(
+            `You have not connected to your GraphQL endpoint, please run "connect" first`
+          );
+        }
         const query = options.mutations[key] as any;
 
-        return request(options.endpoint, print(query), variables);
+        if (typeof _requestOptions.headers === 'function') {
+          _client.setHeaders(_requestOptions.headers());
+        }
+
+        return _client.request(print(query), variables);
       };
       return aggr;
     }, {}),

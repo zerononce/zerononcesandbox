@@ -13,6 +13,7 @@
     "build:clean": "rimraf www",
     "build:embed": "cross-env NODE_ENV=production webpack --config config/webpack.embed.js",
     "build:sandbox": "cross-env NODE_ENV=production SANDBOX_ONLY=true node scripts/build.js",
+    "update:schema": "apollo schema:download --header=\"Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJDb2RlU2FuZGJveCIsImV4cCI6MTU3MTk5MzU2MSwiaWF0IjoxNTY5NDAxNTYxLCJpc3MiOiJDb2RlU2FuZGJveCIsImp0aSI6IjRlMWI4Mzc1LWMwYTItNDBiYS05OTAwLTdmZTZhNWNhM2QxNiIsIm5iZiI6MTU2OTQwMTU2MCwic3ViIjoiVXNlcjozZjRmZGE1Ni0zYjc1LTRlMjItOTFjZi1kNjc2ZGFjYzM4OGYiLCJ0eXAiOiJhY2Nlc3MifQ.wiHiFrPr-CIMaLz1T0McUWi0C9uhuqfJTZXkeiy-nZ0jq0eujUvPJdjJInfJ2Ed0QG3D2VLm0ltuQcBQH8gSuA\" --endpoint=http://localhost:3000/api/graphql graphql-schema.json && apollo codegen:generate --localSchemaFile=graphql-schema.json --target=typescript --includes=src/app/overmind/**/*.ts --tagName=gql --no-addTypename --globalTypesFile=src/app/overmind/graphql-global-types.ts graphql-types",
     "copy-assets": "cross-env NODE_ENV=production node scripts/copy-assets.js",
     "integrations:start": "docker run -v $(pwd):/app/ -it codesandbox/test yarn start:test",
     "lint": "npm run lint:app && npm run lint:embed && npm run lint:sandbox",

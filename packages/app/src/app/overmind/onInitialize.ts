@@ -6,6 +6,12 @@ export const onInitialize: OnInitialize = (
 ) => {
   const provideJwtToken = () => state.jwt || effects.jwt.get();
 
+  effects.dashboard_new.initializeGraphQLClient('/api/graphql', {
+    headers: () => ({
+      authorization: provideJwtToken() ? `Bearer ${provideJwtToken()}` : '',
+    }),
+  });
+
   effects.fsSync.initialize({
     onModulesByPathChange(cb: (modulesByPath: any) => void) {
       overmindInstance.reaction(
