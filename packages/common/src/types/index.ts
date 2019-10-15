@@ -129,6 +129,7 @@ export type CustomTemplate = {
   id: string;
   iconUrl?: string;
   url: string | null;
+  published?: boolean;
 };
 
 export type GitInfo = {
