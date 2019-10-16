@@ -13,7 +13,7 @@
     "build:clean": "rimraf www",
     "build:embed": "cross-env NODE_ENV=production webpack --config config/webpack.embed.js",
     "build:sandbox": "cross-env NODE_ENV=production SANDBOX_ONLY=true node scripts/build.js",
-    "update:schema": "codesandbox login -s && node ./config/codegen.js",
+    "update:schema": "CODESANDBOX_NODE_ENV=development codesandbox login -s && node ./config/codegen.js",
     "generate": "codesandbox login -s && graphql-codegen --config ./config/codegen.js",
     "generate:staging": "cross-env CODESANDBOX_NODE_ENV=development yarn generate --staging",
     "copy-assets": "cross-env NODE_ENV=production node scripts/copy-assets.js",
