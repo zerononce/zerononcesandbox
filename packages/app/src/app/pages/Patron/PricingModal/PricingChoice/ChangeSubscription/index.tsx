@@ -19,12 +19,12 @@ interface IChangeSubscriptionProps {
   updateSubscription: (params: { coupon: string }) => void;
 }
 
-export const ChangeSubscription: React.FC<IChangeSubscriptionProps> =({
+export const ChangeSubscription: React.FC<IChangeSubscriptionProps> = ({
   date,
   markedAsCancelled,
   cancelSubscription,
   updateSubscription,
-}) {
+}) => {
   const {
     state: {
       patron: { isUpdatingSubscription, error },
@@ -110,4 +110,4 @@ export const ChangeSubscription: React.FC<IChangeSubscriptionProps> =({
       </SmallText>
     </div>
   );
-}
+};
