@@ -1,9 +1,37 @@
 import { Action, AsyncAction } from 'app/overmind';
 import { withLoadApp } from 'app/overmind/factories';
 
+import { Direction } from 'app/overmind/graphql-global-types';
 import { OrderBy } from './state';
 
-export const dashboardMounted = withLoadApp();
+export const recentSandboxesMounted: AsyncAction = withLoadApp(
+  async ({ state, effects }) => {
+    const dashboard = state.dashboard_new;
+
+    try {
+      dashboard.orderBy.field = 'updatedAt';
+      dashboard.orderBy.order = Direction.DESC;
+
+      const recentSandboxes = (await effects.dashboard_new.queries.recentSandboxes(
+        {
+          orderDirection: dashboard.orderBy.order,
+          orderField: dashboard.orderBy.field,
+        }
+      )).me.sandboxes;
+
+      Object.assign(
+        dashboard.sandboxes,
+        recentSandboxes.reduce((aggr, sandbox) => {
+          aggr[sandbox.id] = sandbox;
+
+          return aggr;
+        }, {})
+      );
+    } catch (error) {
+      state.dashboard_new.error = error.message;
+    }
+  }
+);
 
 export const sandboxesSelected: Action<{
   sandboxIds: string[];

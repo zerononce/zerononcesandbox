@@ -8,15 +8,14 @@ import { ITemplate } from './types';
 
 interface Props {
   sandboxes: any[];
-  Header: React.ComponentType;
-  SubHeader: React.ComponentType;
-  ExtraElement: React.ComponentType;
-
-  possibleTemplates: ITemplate[];
+  Header: React.ReactNode;
+  SubHeader?: React.ComponentType;
+  ExtraElement: React.ComponentType<any>;
+  possibleTemplates?: ITemplate[];
   isLoading?: boolean;
   hideOrder?: boolean;
   hideFilters?: boolean;
-  page?: number;
+  page?: string;
   actions?: any[];
 }
 

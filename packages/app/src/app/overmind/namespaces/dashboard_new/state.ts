@@ -1,9 +1,11 @@
-import { Sandbox } from '@codesandbox/common/lib/types';
 import { Derive } from 'app/overmind';
-import { sortBy } from 'lodash-es';
+import { sortBy, countBy } from 'lodash-es';
+import { Direction } from 'app/overmind/graphql-global-types';
+import getTemplate, { TemplateType } from '@codesandbox/common/lib/templates';
+import { Sandbox } from './graphql-types/Sandbox';
 
 export type OrderBy = {
-  order: 'desc' | 'asc';
+  order: Direction;
   field: string;
 };
 
@@ -19,11 +21,13 @@ type State = {
   teams: any[];
   currentTeam: any;
   sandboxes: {
-    [id: string]: any;
+    [id: string]: Sandbox;
   };
+  error: string;
   sidebarCollection: any[];
   isTemplateSelected: Derive<State, (templateName: string) => boolean>;
-  getFilteredSandboxes: Derive<State, (sandboxes: Sandbox[]) => Sandbox[]>;
+  currentSandboxes: Derive<State, Sandbox[]>;
+  mostUsedTemplate: Derive<State, any>;
 };
 
 export const state: State = {
@@ -32,10 +36,11 @@ export const state: State = {
   sandboxes: {},
   currentTeam: null,
   teams: [],
+  error: null,
   trashSandboxIds: [],
   isDragging: false,
   orderBy: {
-    order: 'desc',
+    order: Direction.DESC,
     field: 'updatedAt',
   },
   filters: {
@@ -44,7 +49,33 @@ export const state: State = {
   },
   isTemplateSelected: ({ filters }) => templateName =>
     !filters.blacklistedTemplates.includes(templateName),
-  getFilteredSandboxes: ({ orderBy, filters }) => sandboxes => {
+  mostUsedTemplate: ({ currentSandboxes }) => {
+    const countedByTemplates = countBy(
+      currentSandboxes,
+      s => s.source.template
+    );
+    const mostUsedTemplateInfo = Object.keys(countedByTemplates).reduce(
+      (prev, template) => {
+        const count = countedByTemplates[template];
+        if (count > prev.count) {
+          return {
+            count,
+            template,
+          };
+        }
+
+        return prev;
+      },
+      { count: 0, template: '' }
+    );
+
+    if (mostUsedTemplateInfo.count > 0) {
+      return getTemplate(mostUsedTemplateInfo.template as TemplateType);
+    }
+
+    return null;
+  },
+  currentSandboxes: ({ orderBy, filters, sandboxes }) => {
     const orderField = orderBy.field;
     const orderOrder = orderBy.order;
     const { blacklistedTemplates } = filters;
@@ -63,10 +94,12 @@ export const state: State = {
 
       return s[orderField];
     }) as Sandbox[]).filter(
-      x => blacklistedTemplates.indexOf(x.source.template) === -1
+      sandbox =>
+        blacklistedTemplates.indexOf(sandbox.source.template) === -1 &&
+        !sandbox.customTemplate
     );
 
-    if (orderOrder === 'desc') {
+    if (orderOrder === Direction.DESC) {
       orderedSandboxes = orderedSandboxes.reverse();
     }
 

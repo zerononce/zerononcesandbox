@@ -1,5 +1,11 @@
 import React from 'react';
-import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
+import {
+  Route,
+  Switch,
+  Redirect,
+  withRouter,
+  RouteComponentProps,
+} from 'react-router-dom';
 
 import RecentSandboxes from './routes/RecentSandboxes';
 import PathedSandboxes from './routes/PathedSandboxes';
@@ -9,7 +15,7 @@ import SearchSandboxes from './routes/SearchSandboxes';
 import CreateTeam from './routes/CreateTeam';
 import TeamView from './routes/TeamView';
 
-const Content = () => (
+const Content: React.FC<RouteComponentProps> = () => (
   <Switch>
     <Route path="/dashboard/recent" component={RecentSandboxes} />
     <Route path="/dashboard/trash" component={DeletedSandboxes} />
